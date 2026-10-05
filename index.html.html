@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Operation Brüssel – EU-Escape-Room</title>
+<style>
+:root{--bg:#eef2fa;--fg:#0b1a3a;--card:#fff;--ac:#0b3d91;--onac:#fff;--gold:#b88700;--mut:#55627f;--bd:#cdd6ea;--bad:#b3261e;--ok:#18793a;--in:#f6f8fd;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#081230;--fg:#eaf0ff;--card:#122349;--ac:#ffcc00;--onac:#081230;--gold:#ffcc00;--mut:#9fb0d8;--bd:#2a3d72;--bad:#ff8a80;--ok:#7be0a0;--in:#0c1a3d}}
+:root[data-theme="dark"]{--bg:#081230;--fg:#eaf0ff;--card:#122349;--ac:#ffcc00;--onac:#081230;--gold:#ffcc00;--mut:#9fb0d8;--bd:#2a3d72;--bad:#ff8a80;--ok:#7be0a0;--in:#0c1a3d}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.55 "Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
+.wrap{max-width:700px;margin:0 auto;padding:20px 16px 40px}
+h1{font:800 clamp(1.7rem,6vw,2.5rem)/1.1 Georgia,"Times New Roman",serif;margin:0 0 6px;letter-spacing:-.01em}
+h2{font:700 1.25rem/1.25 Georgia,serif;margin:0 0 8px}
+.sub{color:var(--mut);margin:0 0 20px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:18px;margin:0 0 16px}
+.card.alert{border-left:6px solid var(--gold)}
+button{font:inherit;font-weight:700;cursor:pointer;border:0;border-radius:10px;padding:12px 22px;background:var(--ac);color:var(--onac)}
+button.sm{padding:4px 10px;margin-left:4px;background:var(--in);color:var(--fg);border:1px solid var(--bd)}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.bar{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin:0 0 16px;font-weight:700}
+.bar span{background:var(--card);border:1px solid var(--bd);border-radius:999px;padding:4px 14px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--bd)}
+.row:first-child{border-top:0}
+select,input[type=text]{font:inherit;padding:8px 10px;border-radius:8px;border:1px solid var(--bd);background:var(--in);color:var(--fg);max-width:100%}
+input[type=text]{width:170px}
+input[type=checkbox]{width:22px;height:22px;flex:none}
+.row.l{justify-content:flex-start}
+#msg{min-height:1.6em;margin:12px 0 0;font-weight:700}
+#msg.bad{color:var(--bad)}#msg.ok{color:var(--ok)}
+.big{font:800 3.4rem/1 Georgia,serif;color:var(--gold)}
+.pg{height:6px;background:var(--bd);border-radius:3px;margin:0 0 16px;overflow:hidden}
+.pg i{display:block;height:100%;background:var(--gold);transition:width .3s}
+.hide{display:none}
+.code{font:800 1.5rem/1 Georgia,serif;letter-spacing:.35em;color:var(--gold);margin:0 0 14px;text-align:center}
+.logic{margin:0 0 10px;padding-left:20px}
+@media (max-width:520px){.row{flex-direction:column;align-items:stretch}.row.l{flex-direction:row}input[type=text]{width:100%}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<section id="intro">
+  <h1>Operation Brüssel</h1>
+  <p class="sub">Der digitale EU-Escape-Room</p>
+  <div class="card alert">
+    <h2>Die Ausgangslage</h2>
+    <p>In Brüssel herrscht Alarm: Der Hacker „Zero-Veto“ hat den fertigen Gesetzesentwurf zum europaweiten Schutz von Verbraucherdaten gestohlen und verschlüsselt. Damit niemand die Datei retten kann, hat er auch noch die <b>Namen und Aufgaben der EU-Institutionen vertauscht</b>.</p>
+    <p>Nur wer die Zuständigkeiten von <b>Europäischer Kommission, Europäischem Parlament, Rat der Europäischen Union und Europäischem Rat</b> wirklich kennt, kann die acht digitalen Schlösser knacken und den Entwurf wiederherstellen.</p>
+    <p><b>Deine Regeln:</b> Du hast 25 Minuten. Du startest mit 100 Punkten. Jede falsche Antwort kostet 10 Punkte. Lösungen werden dir nicht verraten.</p>
+  </div>
+  <button id="startBtn">Start</button>
+</section>
+
+<section id="game" class="hide">
+  <div class="bar"><span>Score: <b id="sc">100</b></span><span id="tmr">25:00</span><span id="stp">Schloss 1/8</span></div>
+  <div class="pg"><i id="pgb"></i></div>
+  <p class="code" id="cd" aria-label="Entschlüsselter Code"></p>
+  <div class="card">
+    <h2 id="hd"></h2>
+    <p id="q"></p>
+    <div id="box"></div>
+    <p id="msg" role="status"></p>
+  </div>
+  <button id="chk">Antwort prüfen</button>
+</section>
+
+<section id="end" class="hide">
+  <div class="card">
+    <h1 id="et"></h1>
+    <p id="ex"></p>
+    <div class="big" id="es"></div>
+    <p id="er" class="sub"></p>
+  </div>
+  <button id="again">Nochmal spielen</button>
+</section>
+
+</div>
+<script>
+const $=s=>document.querySelector(s);
+const n=v=>v.toLowerCase().replace(/ß/g,"ss").replace(/[^a-zäöü0-9 ]/g,"").trim();
+const vals=el=>[...el.querySelectorAll("select,input[type=text]")].map(x=>n(x.value));
+
+const P=[
+{t:"Schloss 1: Zuordnung",q:"Ordne jeder Beschreibung die richtige Institution zu. Vorsicht: Zero-Veto hat die Reihenfolge der Auswahlfelder durcheinandergebracht.",
+ R:["Führt EU-Beschlüsse aus und wacht als „Hüterin der Verträge“ über das EU-Recht","Wird alle fünf Jahre direkt von den Bürgerinnen und Bürgern gewählt","Hier sitzen je nach Thema die Fachministerinnen und Fachminister der Mitgliedstaaten","Staats- und Regierungschefs legen die politische Richtung fest, ohne selbst Gesetze zu beschließen"],
+ O:["Rat der Europäischen Union","Europäische Kommission","Europäischer Rat","Europäisches Parlament"],
+ A:["Europäische Kommission","Europäisches Parlament","Rat der Europäischen Union","Europäischer Rat"],
+ build(el){el.innerHTML=this.R.map(r=>`<div class="row"><span>${r}</span><select><option value="">– wählen –</option>${this.O.map(o=>`<option>${o}</option>`).join("")}</select></div>`).join("")},
+ check(){const v=vals($("#box"));return this.A.every((a,i)=>v[i]===n(a))}},
+
+{t:"Schloss 2: Wer bin ich?",q:"Ein Fragment der gestohlenen Datei verrät dir diese Hinweise. Welche Institution ist gemeint?",
+ build(el){el.innerHTML=`<p><i>„Ich habe 27 Mitglieder, eines pro Mitgliedstaat. Trotzdem vertrete ich nicht einzelne Länder, sondern das Interesse der gesamten EU. Nur ich darf offiziell Gesetzesvorschläge machen. Mein Hauptsitz ist Brüssel, an meiner Spitze steht eine Präsidentin oder ein Präsident.“</i></p><div class="row l"><input type="text" aria-label="Antwort" placeholder="Institution"></div>`},
+ check(){return /kommission/.test(vals($("#box"))[0])}},
+
+{t:"Schloss 3: Reihenfolge",q:"Zero-Veto hat die Schritte eines Gesetzgebungsverfahrens durcheinandergewürfelt. Bring sie mit den Pfeilen in die richtige Reihenfolge.",
+ S:["Die Kommission legt einen Gesetzesvorschlag vor","Parlament und Rat der EU beraten den Vorschlag","Parlament und Rat einigen sich auf denselben Text","Das Gesetz wird im Amtsblatt veröffentlicht","Das Gesetz tritt in Kraft"],
+ build(el){this.o=[3,1,4,0,2];const r=()=>{el.innerHTML=this.o.map((s,i)=>`<div class="row"><span>${i+1}. ${this.S[s]}</span><span><button class="sm" data-d="-1" data-i="${i}" aria-label="nach oben">▲</button><button class="sm" data-d="1" data-i="${i}" aria-label="nach unten">▼</button></span></div>`).join("");el.querySelectorAll("button").forEach(b=>b.onclick=()=>{const i=+b.dataset.i,j=i+ +b.dataset.d;if(j<0||j>4)return;[this.o[i],this.o[j]]=[this.o[j],this.o[i]];r()})};r()},
+ check(){return this.o.every((v,i)=>v===i)}},
+
+{t:"Schloss 4: Fehlertext",q:"Im Protokoll der gestohlenen Datei haben sich falsche Aussagen eingeschlichen. Markiere alle Aussagen, die nicht stimmen.",
+ S:["Der Europäische Rat besteht aus den Staats- und Regierungschefs der Mitgliedstaaten.","Das Europäische Parlament hat das alleinige Recht, Gesetze vorzuschlagen.","Im Rat der EU sitzen je nach Thema die zuständigen Fachminister der Mitgliedstaaten.","Der Europäische Rat verabschiedet gemeinsam mit dem Parlament die EU-Gesetze.","Die Abgeordneten des Europäischen Parlaments werden direkt von den Bürgern gewählt.","Die Kommission vertritt die Interessen der einzelnen Mitgliedstaaten gegenüber der EU."],
+ build(el){el.innerHTML=this.S.map(s=>`<label class="row l"><input type="checkbox"><span>${s}</span></label>`).join("")},
+ check(){return [...$("#box").querySelectorAll("input")].every((x,i)=>x.checked===[1,3,5].includes(i))}},
+
+{t:"Schloss 5: Zahlencode",q:"Der Tresorcode besteht aus der Zahl der EU-Mitgliedstaaten, direkt gefolgt von der Länge einer Wahlperiode des Europäischen Parlaments in Jahren. Gib den Code ohne Leerzeichen ein.",
+ build(el){el.innerHTML=`<div class="row l"><input type="text" inputmode="numeric" aria-label="Code" placeholder="Code"></div>`},
+ check(){return vals($("#box"))[0].replace(/ /g,"")==="275"}},
+
+{t:"Schloss 6: Lückentext",q:"Das letzte Schloss öffnet sich, wenn du die Lücken im Originaltext füllst.",
+ G:[/^(strassburg|strasbourg)$/,/ministerrat/,/^(leitlinien|leitlinie|impulse|ziele|richtung|vorgaben)$/,/^initiativ/],
+ build(el){const i=k=>`<input type="text" data-k="${k}" aria-label="Lücke ${k+1}">`;el.innerHTML=`<p>Das Europäische Parlament hat seinen offiziellen Sitz in ${i(0)} (Frankreich).</p><p>Der Rat der EU wird auch ${i(1)} genannt.</p><p>Der Europäische Rat gibt der EU die politischen ${i(2)} vor.</p><p>Nur die Kommission besitzt das ${i(3)}-Recht für Gesetzesvorschläge.</p>`},
+ check(){const v=vals($("#box"));return this.G.every((g,i)=>g.test(v[i]))}},
+
+{t:"Schloss 7: Geheimschrift",q:"Zero-Veto hat ein Wort mit der Caesar-Methode verschlüsselt: Jeder Buchstabe wurde im Alphabet um 3 Stellen nach vorne verschoben (aus A wurde D). Entschlüssle das Wort. Es bezeichnet einen EU-Rechtsakt, den Parlament und Rat beschließen und der den Mitgliedstaaten Ziele vorgibt, die sie in nationales Recht umsetzen müssen.",
+ build(el){el.innerHTML=`<p class="code">ULFKWOLQLHQ</p><div class="row l"><input type="text" aria-label="Lösungswort" placeholder="Klartext"></div>`},
+ check(){return /^richtlinien?$/.test(vals($("#box"))[0])}},
+
+{t:"Schloss 8: Logikrätsel",q:"Drei Institutionen sind verschlüsselt. Finde heraus, wer hinter A, B und C steckt. Der Europäische Rat gehört nicht dazu.",
+ O:["Europäisches Parlament","Europäische Kommission","Rat der Europäischen Union"],
+ A:["Europäische Kommission","Rat der Europäischen Union","Europäisches Parlament"],
+ build(el){const sel=`<select><option value="">– wählen –</option>${this.O.map(o=>`<option>${o}</option>`).join("")}</select>`;el.innerHTML=`<ul class="logic"><li>A darf als Einzige offiziell Gesetzesvorschläge machen.</li><li>B beschließt Gesetze gemeinsam mit C und vertritt dabei die Regierungen.</li><li>C wird direkt von den Bürgerinnen und Bürgern gewählt.</li></ul>`+["A","B","C"].map(l=>`<div class="row"><span><b>${l}</b> ist</span>${sel}</div>`).join("")},
+ check(){const v=vals($("#box"));return this.A.every((a,i)=>v[i]===n(a))}}
+];
+
+let score,left,idx,tm,miss;const W="EINIGUNG";
+const show=id=>{["intro","game","end"].forEach(s=>$("#"+s).classList.toggle("hide",s!==id))};
+const fmt=s=>String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0");
+function upd(){$("#sc").textContent=score;$("#tmr").textContent=fmt(Math.max(0,left))}
+function msg(t,c){const m=$("#msg");m.textContent=t;m.className=c||""}
+function load(f){const p=P[idx];$("#hd").textContent=p.t;$("#q").textContent=p.q;p.build($("#box"));$("#cd").textContent=[...W].map((c,i)=>i<idx?c:"_").join(" ");$("#stp").textContent="Schloss "+(idx+1)+"/"+P.length;$("#pgb").style.width=(idx/P.length*100)+"%";msg(f||"",f?"ok":"")}
+function start(){miss=0;score=100;left=1500;idx=0;clearInterval(tm);show("game");upd();load();tm=setInterval(()=>{left--;upd();if(left<=0)end(false)},1000)}
+function end(win){clearInterval(tm);show("end");const used=1500-Math.max(0,left);
+ $("#et").textContent=win?"Entschlüsselt!":"Zeit abgelaufen";
+ $("#ex").textContent=win?"Alle acht Schlösser sind geknackt. Der Gesetzesentwurf zum Schutz von Verbraucherdaten ist wiederhergestellt und kann seinen Weg durch die EU-Institutionen antreten.":"Die Verschlüsselung hat gehalten. Der Gesetzesentwurf bleibt in den Händen von Zero-Veto. Versuch es noch einmal.";
+ $("#es").textContent=score+" Punkte";
+ $("#er").textContent=(win?"Lösungswort: "+W+" · Zeit: "+fmt(used)+" · Fehlversuche: "+miss+" · ":"")+(win?(score>=90?"Rang: EU-Profi":score>=60?"Rang: Sattelfest":"Rang: Auf dem Weg nach Brüssel"):"Gelöste Schlösser: "+idx+" von "+P.length)}
+function submit(){const p=P[idx];if(p.check()){idx++;idx>=P.length?end(true):load("Schloss geöffnet!")}else{miss++;score=Math.max(0,score-10);upd();msg("Falsch. Du verlierst 10 Punkte. Versuch es noch einmal.","bad")}}
+$("#startBtn").onclick=start;$("#again").onclick=start;$("#chk").onclick=submit;
+document.addEventListener("keydown",e=>{if(e.key==="Enter"&&!$("#game").classList.contains("hide")&&e.target.tagName!=="BUTTON")submit()});
+</script>
+</body>
+</html>
